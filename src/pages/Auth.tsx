@@ -23,24 +23,38 @@ const Auth = () => {
     const fullName = formData.get("fullName") as string;
     const phoneNumber = formData.get("phoneNumber") as string;
 
-    const { error } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
           full_name: fullName,
-          phone_number: phoneNumber,
+          phone_number: "258" + phoneNumber,
         },
       },
     });
 
+    if (signUpError) {
+      setLoading(false);
+      toast.error(signUpError.message);
+      return;
+    }
+
+    // Auto sign in after successful registration
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
     setLoading(false);
 
-    if (error) {
-      toast.error(error.message);
+    if (signInError) {
+      toast.error("Conta criada, mas não foi possível fazer login automático.");
+      toast.error(signInError.message);
     } else {
-      toast.success("Conta criada com sucesso! Faça login para continuar.");
+      toast.success("Conta criada com sucesso!");
+      navigate("/");
     }
   };
 
@@ -134,7 +148,7 @@ const Auth = () => {
                       id="signup-phone"
                       name="phoneNumber"
                       type="tel"
-                      placeholder="258841234567"
+                      placeholder="84/85XXXXXX"
                       required
                     />
                   </div>

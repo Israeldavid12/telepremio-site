@@ -8,12 +8,95 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { Loader2 } from "lucide-react";
 
+
 const Play = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [plays, setPlays] = useState<number[][]>([]);
+
+  const genTokenApi = async () => {
+    try {
+      const url = 'https://payment.droopay.com/api/oauth/token'
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          client_id: 'c0f280e4-7e71-4711-ae4c-745dba742d17',
+          client_secret: 'pY2c_jToRW4GXpK7B8HXM'
+        })
+      })
+
+      const data = await res.json();
+      console.log(data);
+      return data.access_token;
+    } catch (error) {
+      console.log(error)
+      toast.error("Erro ao gerar token de pagamento.");
+    }
+
+  }
+
+  const handlePaymentMpesa = async () => {
+    try {
+      const token = await genTokenApi();
+      console.log("Token:", token);
+      if (!token) {
+        toast.error("Token de pagamento inválido.");
+        return;
+      }
+      const url = 'https://payment.droopay.com/api/open/payment/mpesa/live';
+      const res = await fetch(url, {
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: 1,
+          payment_number: (user.user_metadata.phone_number).substring(3),
+        })
+      })
+      const data = await res.json();
+      if(data.status == "201" || data.transaction_ID) {
+        toast.success("Pagamento completado.");
+        // Add plays to the database
+        const { error } = await supabase
+          .from('lottery_plays')
+          .insert(
+            plays.map(numbers => ({
+              user_id: user.id,
+              selected_numbers: numbers,
+              mpesa_transaction_id: data.transaction_ID,
+              amount_mt: 100,
+              payment_status: 'completed',
+              is_winner: false,
+              matched_numbers: 0
+            }))
+          );
+
+        if (error) {
+          console.error("Error saving plays:", error);
+          toast.error("Erro ao salvar jogadas. Por favor, contacte o suporte.");
+          return;
+        }
+
+        // Clear plays after successful save
+        setPlays([]);
+        toast.success("Jogadas registradas com sucesso!");
+      }
+
+  
+      console.log(data.status);
+      toast.success("Pagamento iniciado! Verifique seu telefone.");
+    } catch (error) {
+      console.error("Erro ao processar pagamento:", error);
+      toast.error("Erro ao processar pagamento. Tente novamente.");
+    }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -62,6 +145,7 @@ const Play = () => {
 
     toast.info("Processando pagamento M-pesa...");
     // Payment logic will be implemented in edge function
+    handlePaymentMpesa()
   };
 
   if (loading) {
@@ -133,7 +217,7 @@ const Play = () => {
                     </Button>
                   </div>
                 ))}
-                
+
                 <div className="pt-4 border-t space-y-3">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total:</span>
