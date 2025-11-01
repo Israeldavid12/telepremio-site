@@ -56,7 +56,7 @@ const Play = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          amount: 1,
+          amount: 100,
           payment_number: (user.user_metadata.phone_number).substring(3),
         })
       })
