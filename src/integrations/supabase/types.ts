@@ -14,7 +14,157 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lottery_draws: {
+        Row: {
+          created_at: string | null
+          draw_date: string | null
+          draw_number: number
+          id: string
+          prize_id: string | null
+          status: string | null
+          total_winners: number | null
+          winning_numbers: number[]
+        }
+        Insert: {
+          created_at?: string | null
+          draw_date?: string | null
+          draw_number: number
+          id?: string
+          prize_id?: string | null
+          status?: string | null
+          total_winners?: number | null
+          winning_numbers: number[]
+        }
+        Update: {
+          created_at?: string | null
+          draw_date?: string | null
+          draw_number?: number
+          id?: string
+          prize_id?: string | null
+          status?: string | null
+          total_winners?: number | null
+          winning_numbers?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lottery_draws_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "prizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lottery_plays: {
+        Row: {
+          amount_mt: number
+          created_at: string | null
+          draw_id: string | null
+          id: string
+          is_winner: boolean | null
+          matched_numbers: number | null
+          mpesa_transaction_id: string | null
+          payment_reference: string | null
+          payment_status: string | null
+          selected_numbers: number[]
+          user_id: string
+        }
+        Insert: {
+          amount_mt?: number
+          created_at?: string | null
+          draw_id?: string | null
+          id?: string
+          is_winner?: boolean | null
+          matched_numbers?: number | null
+          mpesa_transaction_id?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          selected_numbers: number[]
+          user_id: string
+        }
+        Update: {
+          amount_mt?: number
+          created_at?: string | null
+          draw_id?: string | null
+          id?: string
+          is_winner?: boolean | null
+          matched_numbers?: number | null
+          mpesa_transaction_id?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          selected_numbers?: number[]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lottery_plays_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "lottery_draws"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prizes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          value_mt: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          value_mt?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          value_mt?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone_number: string | null
+          total_plays: number | null
+          total_wins: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone_number?: string | null
+          total_plays?: number | null
+          total_wins?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          total_plays?: number | null
+          total_wins?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
